@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pum's Vault">
+<meta name="theme-color" content="#0f0f0f">
+<title>Pum's Net Worth Vault</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.4.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface-0: #161616;
+  --surface-1: #1e1e1e;
+  --surface-2: #262626;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.18);
+  --border-accent: rgba(99,155,255,0.5);
+  --border-success: rgba(52,199,89,0.5);
+  --border-danger: rgba(255,69,58,0.4);
+  --text-primary: #f0f0f0;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666;
+  --text-accent: #639BFF;
+  --text-success: #34C759;
+  --text-danger: #FF453A;
+  --text-warning: #FFD60A;
+  --fill-accent: #3478f6;
+  --bg-accent: rgba(52,120,246,0.12);
+  --bg-success: rgba(52,199,89,0.1);
+  --bg-danger: rgba(255,69,58,0.1);
+  --bg-warning: rgba(255,214,10,0.1);
+  --radius: 8px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--text-primary); font-family: var(--font-sans); }
+body { max-width: 480px; margin: 0 auto; padding: 0 1rem 2rem; }
+.page { display: none; padding-top: 1.25rem; }
+.page.on { display: block; }
+
+/* LOCK */
+.lock-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 95vh; gap: 1rem; }
+.lock-icon { width: 64px; height: 64px; background: var(--bg-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-accent); font-size: 28px; }
+.lock-title { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+.lock-sub { font-size: 13px; color: var(--text-muted); text-align: center; }
+.tg-pill { display: inline-flex; align-items: center; gap: 5px; background: rgba(34,158,217,0.15); color: #5bc8f5; font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid rgba(34,158,217,0.3); }
+.pin-dots { display: flex; gap: 12px; }
+.pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border-strong); transition: background .15s; }
+.pin-dot.filled { background: var(--fill-accent); border-color: var(--fill-accent); }
+.pin-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; width: 210px; }
+.pin-btn { padding: 15px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface-1); color: var(--text-primary); font-size: 20px; font-weight: 400; cursor: pointer; transition: background .1s; }
+.pin-btn:hover { background: var(--surface-2); }
+.pin-btn:active { transform: scale(.94); background: var(--surface-2); }
+.pin-err { color: var(--text-danger); font-size: 12px; height: 16px; text-align: center; }
+
+/* SETUP */
+.setup-card { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 14px; padding: 1.1rem; margin-bottom: .85rem; }
+.setup-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: .25rem; display: flex; align-items: center; gap: 7px; }
+.setup-desc { font-size: 12px; color: var(--text-muted); margin-bottom: .75rem; line-height: 1.5; }
+.step-list { list-style: none; counter-reset: s; margin-bottom: .75rem; }
+.step-list li { counter-increment: s; display: flex; gap: 9px; font-size: 12px; color: var(--text-secondary); margin-bottom: .5rem; line-height: 1.5; }
+.step-list li::before { content: counter(s); min-width: 20px; height: 20px; border-radius: 50%; background: var(--bg-accent); color: var(--text-accent); font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.step-list code { background: var(--surface-0); border: 0.5px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: 11px; color: var(--text-primary); }
+.field-lbl { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+.field-inp { width: 100%; padding: 9px 10px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface-2); color: var(--text-primary); font-size: 13px; font-family: var(--font-mono); outline: none; margin-bottom: .7rem; transition: border-color .15s; }
+.field-inp:focus { border-color: var(--border-accent); }
+.field-inp.ok { border-color: var(--border-success); }
+.btn-primary { width: 100%; padding: 11px; border: none; border-radius: var(--radius); background: var(--fill-accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+.btn-primary:hover { opacity: .9; }
+.btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+.status-msg { display: flex; align-items: center; gap: 7px; padding: 8px 11px; border-radius: var(--radius); font-size: 12px; margin-top: .5rem; }
+.status-msg.ok { background: var(--bg-success); color: var(--text-success); border: 0.5px solid var(--border-success); }
+.status-msg.err { background: var(--bg-danger); color: var(--text-danger); border: 0.5px solid var(--border-danger); }
+.status-msg.info { background: var(--bg-accent); color: var(--text-accent); border: 0.5px solid var(--border-accent); }
+.pin-err2 { color: var(--text-danger); font-size: 12px; min-height: 16px; margin: .25rem 0; }
+
+/* TOPBAR */
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.logo-circle { width: 34px; height: 34px; border-radius: 50%; background: var(--fill-accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
+.btn-sm { padding: 5px 11px; border: 0.5px solid var(--border); border-radius: var(--radius); background: transparent; color: var(--text-secondary); font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.btn-sm:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.btn-sm.tg { color: #5bc8f5; border-color: rgba(34,158,217,0.3); }
+.btn-sm.lock:hover { background: var(--bg-danger); color: var(--text-danger); border-color: var(--border-danger); }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; margin-bottom: 1rem; border-bottom: 0.5px solid var(--border); padding-bottom: .6rem; }
+.tab { padding: 5px 13px; border-radius: var(--radius); font-size: 12px; cursor: pointer; color: var(--text-secondary); background: transparent; border: 0.5px solid transparent; }
+.tab.active { background: var(--bg-accent); color: var(--text-accent); border-color: var(--border-accent); }
+
+/* RATE BAR */
+.rate-bar { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 7px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+.rate-bar label { font-size: 12px; color: var(--text-muted); }
+.rate-bar input { width: 85px; padding: 4px 7px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface-2); color: var(--text-primary); font-size: 13px; font-weight: 500; outline: none; }
+.rate-bar input:focus { border-color: var(--border-accent); }
+
+/* SUMMARY */
+.summary { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 14px; padding: 1.1rem; margin-bottom: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.nw-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 3px; }
+.nw-val { font-size: 24px; font-weight: 600; color: var(--text-primary); line-height: 1.1; }
+.nw-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+/* BAR */
+.bar-lbl { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.bar-track { height: 7px; background: var(--surface-0); border-radius: 4px; overflow: hidden; display: flex; margin-bottom: 7px; }
+.bar-seg { height: 100%; transition: width .5s ease; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem; }
+.leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
+.leg-dot { width: 7px; height: 7px; border-radius: 2px; }
+
+/* SECTION */
+.sec-hdr { display: flex; align-items: center; gap: 7px; margin-bottom: .5rem; }
+.sec-title { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.sec-sum { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--text-accent); }
+
+/* ASSET CARD */
+.asset-card { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: .75rem; }
+.arow { display: grid; grid-template-columns: 26px 1fr 105px 26px; align-items: center; gap: 6px; padding: 9px 11px; border-bottom: 0.5px solid var(--border); }
+.arow:last-child { border-bottom: none; }
+.arow.off { opacity: .35; }
+.cb { width: 16px; height: 16px; border: 1.5px solid var(--border-strong); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface-2); transition: all .12s; }
+.cb.on { background: var(--fill-accent); border-color: var(--fill-accent); }
+.cb.on::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
+.aname { font-size: 12px; color: var(--text-primary); }
+.abadge { display: inline-block; font-size: 10px; padding: 1px 5px; border-radius: 20px; margin-left: 5px; vertical-align: middle; }
+.b-us { background: rgba(52,120,246,0.15); color: #639BFF; }
+.b-in { background: rgba(186,117,23,0.15); color: #E6A030; }
+.b-cm { background: rgba(29,158,117,0.15); color: #4CD964; }
+.ainput { padding: 5px 7px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface-2); color: var(--text-primary); font-size: 12px; width: 100%; text-align: right; outline: none; }
+.ainput:focus { border-color: var(--border-accent); }
+.ccy { font-size: 10px; color: var(--text-muted); text-align: center; }
+
+/* ACCOUNTS */
+.acct-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 1rem; }
+.acct-card { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 12px; padding: 10px; cursor: pointer; transition: border-color .15s; }
+.acct-card:hover { border-color: var(--border-accent); }
+.acct-card.linked { border-color: var(--border-success); background: rgba(52,199,89,0.06); }
+.acct-logo { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; margin-bottom: 5px; }
+.acct-name { font-size: 11px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+.acct-sub { font-size: 10px; color: var(--text-muted); margin-bottom: 5px; }
+.acct-st { font-size: 10px; color: var(--text-muted); margin-bottom: 5px; }
+.acct-st.ok { color: var(--text-success); }
+.acct-btn { width: 100%; padding: 4px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface-2); color: var(--text-secondary); font-size: 10px; cursor: pointer; }
+.acct-btn:hover { border-color: var(--border-accent); color: var(--text-accent); }
+.acct-btn.lk { background: var(--bg-success); color: var(--text-success); border-color: var(--border-success); }
+
+/* ALERTS */
+.alert-card { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 14px; padding: 1rem; margin-bottom: .85rem; }
+.alert-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: .5rem; display: flex; align-items: center; gap: 7px; }
+.log-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-bottom: 0.5px solid var(--border); color: var(--text-secondary); }
+.log-row:last-child { border-bottom: none; }
+.log-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; }
+.log-badge.ok { background: var(--bg-success); color: var(--text-success); }
+.log-badge.fail { background: var(--bg-danger); color: var(--text-danger); }
+.log-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: .75rem 0; }
+
+/* FOOTER */
+.footer-note { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 1rem; line-height: 1.6; }
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ SETUP PAGE ═══ -->
+<div id="setupPage" class="page on">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;margin-top:.5rem">
+    <div class="logo-circle"><i class="ti ti-shield-lock"></i></div>
+    <div>
+      <div style="font-size:16px;font-weight:700;color:var(--text-primary)">Vault setup</div>
+      <div style="font-size:11px;color:var(--text-muted)">One-time · takes 5 minutes</div>
+    </div>
+  </div>
+
+  <div class="setup-card" style="border-color:var(--border-success);background:rgba(52,199,89,0.05)">
+    <div class="setup-title"><i class="ti ti-brand-telegram" style="color:#229ED9;font-size:17px"></i> Telegram bot — already configured ✓</div>
+    <div class="setup-desc" style="color:var(--text-success)">Your Telegram bot is baked in. Every login will send an instant alert to your Telegram (Promodh S).</div>
+    <div class="status-msg ok" style="margin-bottom:0"><i class="ti ti-check"></i> Bot connected · Alerts ready</div>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-title"><i class="ti ti-lock" style="color:var(--text-accent);font-size:17px"></i> Set your 6-digit PIN</div>
+    <div class="setup-desc">You will enter this PIN every time you open the vault.</div>
+    <div class="field-lbl">New 6-digit PIN</div>
+    <input type="password" class="field-inp" id="sp1" maxlength="6" placeholder="••••••" oninput="this.value=this.value.replace(/\D/g,'');checkSetup()" autocomplete="new-password">
+    <div class="field-lbl">Confirm PIN</div>
+    <input type="password" class="field-inp" id="sp2" maxlength="6" placeholder="••••••" oninput="this.value=this.value.replace(/\D/g,'');checkSetup()" autocomplete="new-password">
+    <div class="pin-err2" id="setupErr"></div>
+    <button class="btn-primary" id="saveBtn" onclick="saveSetup()" disabled>Save and open vault →</button>
+  </div>
+
+  <p class="footer-note">Your Telegram bot is pre-configured.<br>Set your PIN above to activate the vault.</p>
+</div>
+
+<!-- ═══════════════════════════════ LOCK PAGE ════ -->
+<div id="lockPage" class="page">
+  <div class="lock-wrap">
+    <div class="lock-icon"><i class="ti ti-lock"></i></div>
+    <div class="lock-title">Pum's Net Worth Vault</div>
+    <div class="tg-pill"><i class="ti ti-brand-telegram" style="font-size:12px"></i> Telegram alerts active</div>
+    <div class="lock-sub">Enter your 6-digit PIN</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div>
+      <div class="pin-dot" id="d4"></div><div class="pin-dot" id="d5"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-btn" onclick="pp(1)">1</button><button class="pin-btn" onclick="pp(2)">2</button><button class="pin-btn" onclick="pp(3)">3</button>
+      <button class="pin-btn" onclick="pp(4)">4</button><button class="pin-btn" onclick="pp(5)">5</button><button class="pin-btn" onclick="pp(6)">6</button>
+      <button class="pin-btn" onclick="pp(7)">7</button><button class="pin-btn" onclick="pp(8)">8</button><button class="pin-btn" onclick="pp(9)">9</button>
+      <button class="pin-btn" onclick="pc()" style="font-size:14px">⌫</button>
+      <button class="pin-btn" onclick="pp(0)">0</button>
+      <button class="pin-btn" onclick="pc(true)" style="font-size:11px">CLR</button>
+    </div>
+    <div class="pin-err" id="pinErr"></div>
+    <button class="btn-sm" onclick="goSetup()" style="margin-top:.5rem;color:var(--text-muted)"><i class="ti ti-settings" style="font-size:12px"></i> Reconfigure</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ VAULT PAGE ═══ -->
+<div id="vaultPage" class="page">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:9px">
+      <div class="logo-circle"><i class="ti ti-chart-pie"></i></div>
+      <div>
+        <div style="font-size:14px;font-weight:700">Net Worth Vault</div>
+        <div style="font-size:10px;color:var(--text-muted)">Private · Pum's dashboard</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn-sm tg" onclick="showTab('alerts')"><i class="ti ti-brand-telegram" style="font-size:12px"></i> Alerts</button>
+      <button class="btn-sm lock" onclick="logout()"><i class="ti ti-lock" style="font-size:12px"></i> Lock</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-portfolio" onclick="showTab('portfolio')">Portfolio</button>
+    <button class="tab" id="tab-accounts" onclick="showTab('accounts')">Accounts</button>
+    <button class="tab" id="tab-alerts" onclick="showTab('alerts')">Alerts</button>
+    <button class="tab" id="tab-settings" onclick="showTab('settings')">Settings</button>
+  </div>
+
+  <!-- PORTFOLIO TAB -->
+  <div id="tabPortfolio">
+    <div class="rate-bar">
+      <label>₹ USD/INR</label>
+      <input type="number" id="rateIn" value="85" step="0.1" onchange="recalc()">
+      <span style="font-size:10px;color:var(--text-muted);margin-left:auto">Update daily</span>
+    </div>
+    <div class="summary">
+      <div><div class="nw-lbl">Net worth (INR)</div><div class="nw-val" id="totINR">₹0</div><div class="nw-sub" id="totINRs">Awaiting input</div></div>
+      <div><div class="nw-lbl">Net worth (USD)</div><div class="nw-val" id="totUSD">$0</div><div class="nw-sub" id="totUSDs">At ₹85/USD</div></div>
+    </div>
+    <div class="bar-lbl"><span>Portfolio breakdown</span><span id="barTot">₹0 gross</span></div>
+    <div class="bar-track">
+      <div class="bar-seg" id="sg0" style="background:#378ADD;width:0%"></div>
+      <div class="bar-seg" id="sg1" style="background:#1D9E75;width:0%"></div>
+      <div class="bar-seg" id="sg2" style="background:#BA7517;width:0%"></div>
+      <div class="bar-seg" id="sg3" style="background:#D85A30;width:0%"></div>
+      <div class="bar-seg" id="sg4" style="background:#7F77DD;width:0%"></div>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:#378ADD"></div>US equities</div>
+      <div class="leg"><div class="leg-dot" style="background:#1D9E75"></div>Indian equities</div>
+      <div class="leg"><div class="leg-dot" style="background:#BA7517"></div>Commodities</div>
+      <div class="leg"><div class="leg-dot" style="background:#D85A30"></div>Real estate</div>
+      <div class="leg"><div class="leg-dot" style="background:#7F77DD"></div>Cash and other</div>
+    </div>
+    <div id="assetSections"></div>
+  </div>
+
+  <!-- ACCOUNTS TAB -->
+  <div id="tabAccounts" style="display:none">
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:.75rem">Tap Connect for integration guidance for each broker.</p>
+    <div class="acct-grid" id="acctGrid"></div>
+  </div>
+
+  <!-- ALERTS TAB -->
+  <div id="tabAlerts" style="display:none">
+    <div class="alert-card">
+      <div class="alert-title"><i class="ti ti-brand-telegram" style="color:#229ED9"></i> Telegram notifications
+        <span id="tgStatus" class="tg-pill" style="margin-left:auto;font-size:10px">Checking...</span>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:.75rem">Every login — successful or failed — sends an instant message to your Telegram.</p>
+      <button class="btn-primary" id="testBtn" onclick="testAlert()">Send test alert now</button>
+      <div id="testStatus" style="margin-top:.5rem"></div>
+    </div>
+    <div class="alert-card">
+      <div class="alert-title"><i class="ti ti-history"></i> Login history</div>
+      <div id="logList"><div class="log-empty">No logins yet this session.</div></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div id="tabSettings" style="display:none">
+    <div class="setup-card">
+      <div class="setup-title"><i class="ti ti-lock" style="color:var(--text-accent)"></i> Change PIN</div>
+      <div class="field-lbl">New 6-digit PIN</div>
+      <input type="password" class="field-inp" id="cp1" maxlength="6" placeholder="••••••" oninput="this.value=this.value.replace(/\D/g,'')">
+      <div class="field-lbl">Confirm PIN</div>
+      <input type="password" class="field-inp" id="cp2" maxlength="6" placeholder="••••••" oninput="this.value=this.value.replace(/\D/g,'')">
+      <div class="pin-err2" id="cpErr"></div>
+      <button class="btn-primary" onclick="changePin()">Update PIN</button>
+    </div>
+    <div class="setup-card">
+      <div class="setup-title"><i class="ti ti-brand-telegram" style="color:#229ED9"></i> Update Telegram settings</div>
+      <div class="field-lbl">Bot token</div>
+      <input type="text" class="field-inp" id="stToken" placeholder="Paste new token..." autocomplete="off" spellcheck="false">
+      <div class="field-lbl">Chat ID</div>
+      <input type="text" class="field-inp" id="stChat" placeholder="Paste new chat ID..." autocomplete="off">
+      <button class="btn-primary" onclick="saveTgSettings()">Update Telegram</button>
+      <div id="tgSaveStatus" style="margin-top:.5rem"></div>
+    </div>
+    <div class="setup-card" style="border-color:var(--border-danger)">
+      <div class="setup-title" style="color:var(--text-danger)"><i class="ti ti-trash"></i> Reset vault</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:.75rem">Clears all data, bot config and PIN. Cannot be undone.</p>
+      <button class="btn-primary" style="background:var(--text-danger)" onclick="resetVault()">Reset everything</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────
+const ACCTS = [
+  {id:'vanguard',  name:'Vanguard',       sub:'ETFs & brokerage',   color:'#E63F11', bg:'rgba(230,63,17,.15)',  icon:'V'},
+  {id:'robinhood', name:'Robinhood',       sub:'US equities',        color:'#00C805', bg:'rgba(0,200,5,.12)',    icon:'R'},
+  {id:'kotak',     name:'Kotak Sec.',      sub:'NSE / BSE',          color:'#ED1C24', bg:'rgba(237,28,36,.13)', icon:'K'},
+  {id:'hdfc',      name:'HDFC Sec.',       sub:'NSE / BSE',          color:'#004C8F', bg:'rgba(0,76,143,.15)',  icon:'H'},
+  {id:'icici',     name:'ICICI Sec.',      sub:'NSE / BSE / IPO',    color:'#F16522', bg:'rgba(241,101,34,.13)',icon:'IC'},
+  {id:'zerodha',   name:'Zerodha',         sub:'NSE / BSE / MF',     color:'#387ED1', bg:'rgba(56,126,209,.15)',icon:'Z'},
+  {id:'iifl',      name:'IIFL Sec.',       sub:'Stocks & bonds',     color:'#C0392B', bg:'rgba(192,57,43,.13)', icon:'II'},
+  {id:'indmoney',  name:'INDmoney',        sub:'MF & US stocks',     color:'#7F77DD', bg:'rgba(127,119,221,.14)',icon:'I'},
+  {id:'mcx',       name:'MCX',             sub:'Gold & Silver',      color:'#BA7517', bg:'rgba(186,117,23,.14)',icon:'M'}
+];
+
+const SECTIONS = [
+  {label:'US Equities & ETFs', color:'#378ADD', icon:'ti-flag-3', sumId:'ss0', segId:'sg0', fields:[
+    {k:'vong',    n:'VONG',              b:'b-us', bl:'Vanguard', usd:1},
+    {k:'voo',     n:'VOO',               b:'b-us', bl:'Vanguard', usd:1},
+    {k:'vti',     n:'VTI',               b:'b-us', bl:'Vanguard', usd:1},
+    {k:'vym',     n:'VYM',               b:'b-us', bl:'Vanguard', usd:1},
+    {k:'vig',     n:'VIG',               b:'b-us', bl:'Vanguard', usd:1},
+    {k:'mgc',     n:'MGC / MGK',         b:'b-us', bl:'Vanguard', usd:1},
+    {k:'vwelx',   n:'VWELX',             b:'b-us', bl:'Vanguard', usd:1},
+    {k:'vmfxx',   n:'VMFXX',             b:'b-us', bl:'Vanguard', usd:1},
+    {k:'aapl',    n:'AAPL',              b:'b-us', bl:'Stock',    usd:1},
+    {k:'msft',    n:'MSFT',              b:'b-us', bl:'Stock',    usd:1},
+    {k:'tsm',     n:'TSM',               b:'b-us', bl:'Stock',    usd:1},
+    {k:'spcx',    n:'SPCX',              b:'b-us', bl:'Stock',    usd:1},
+    {k:'rh',      n:'Robinhood holdings',b:'b-us', bl:'RH',       usd:1},
+    {k:'other_us',n:'Other US holdings',                           usd:1}
+  ]},
+  {label:'Indian Equities', color:'#1D9E75', icon:'ti-flag', sumId:'ss1', segId:'sg1', fields:[
+    {k:'kotak_eq',   n:'Kotak Securities',  b:'b-in', bl:'NSE/BSE'},
+    {k:'hdfc_eq',    n:'HDFC Securities',   b:'b-in', bl:'NSE/BSE'},
+    {k:'icici_eq',   n:'ICICI Securities',  b:'b-in', bl:'NSE/BSE'},
+    {k:'zerodha_eq', n:'Zerodha Kite',      b:'b-in', bl:'NSE/BSE'},
+    {k:'iifl_eq',    n:'IIFL Securities',   b:'b-in', bl:'Stocks'},
+    {k:'indmoney_eq',n:'INDmoney',          b:'b-in', bl:'MF/Stocks'},
+    {k:'mf',         n:'Mutual funds (other)'},
+    {k:'other_ind',  n:'Other Indian stocks'}
+  ]},
+  {label:'Commodities', color:'#BA7517', icon:'ti-crystal-ball', sumId:'ss2', segId:'sg2', fields:[
+    {k:'gold_mcx',   n:'Gold – MCX',            b:'b-cm', bl:'MCX'},
+    {k:'silver_mcx', n:'Silver – MCX',           b:'b-cm', bl:'MCX'},
+    {k:'sgb',        n:'Sovereign Gold Bonds',   b:'b-cm', bl:'RBI'},
+    {k:'other_comm', n:'Other commodities'}
+  ]},
+  {label:'Real Estate', color:'#D85A30', icon:'ti-building-estate', sumId:'ss3', segId:'sg3', fields:[
+    {k:'prop1', n:'Primary residence'},
+    {k:'prop2', n:'Investment property'},
+    {k:'land',  n:'Land / plots'}
+  ]},
+  {label:'Cash, PF & Other', color:'#7F77DD', icon:'ti-cash', sumId:'ss4', segId:'sg4', fields:[
+    {k:'bank_ind', n:'Bank savings (India)'},
+    {k:'bank_us',  n:'Bank savings (US)',  usd:1},
+    {k:'epf',      n:'EPF / PPF',          b:'b-in', bl:'Provident'},
+    {k:'nps',      n:'NPS',                b:'b-in', bl:'Pension'},
+    {k:'fd',       n:'FDs & debt'}
+  ]}
+];
+const LIAB = [
+  {k:'home_loan',   n:'Home loan outstanding'},
+  {k:'car_loan',    n:'Car loan'},
+  {k:'other_liab',  n:'Other liabilities'}
+];
+
+// ─── STATE ───────────────────────────────────────────────────
+let PIN='', BOT_TOKEN='', CHAT_ID='', pinEntry='', linked=new Set(), loginLog=[];
+
+// ─── PAGE NAV ────────────────────────────────────────────────
+function show(id) {
+  ['setupPage','lockPage','vaultPage'].forEach(p => {
+    document.getElementById(p).classList.remove('on');
+  });
+  document.getElementById(id).classList.add('on');
+}
+function goSetup() { show('setupPage'); }
+
+// ─── SETUP ───────────────────────────────────────────────────
+function checkSetup() {
+  const p1 = document.getElementById('sp1').value;
+  const p2 = document.getElementById('sp2').value;
+  const err = document.getElementById('setupErr');
+  if(p1.length===6 && p2.length===6 && p1!==p2) err.textContent='PINs do not match.';
+  else if(p1.length>0 && p1.length<6) err.textContent='PIN must be 6 digits.';
+  else err.textContent='';
+  document.getElementById('saveBtn').disabled = !(/^\d{6}$/.test(p1) && p1===p2);
+}
+
+async function fetchChatID() {
+  const tok = document.getElementById('botToken').value.trim();
+  const s = document.getElementById('fetchStatus');
+  s.innerHTML = '<div class="status-msg info"><i class="ti ti-loader"></i> Contacting Telegram...</div>';
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${tok}/getUpdates`);
+    const d = await r.json();
+    if (d.ok && d.result && d.result.length > 0) {
+      const last = d.result[d.result.length-1];
+      const cid = last.message?.chat?.id || last.channel_post?.chat?.id;
+      if (cid) {
+        document.getElementById('chatID').value = cid;
+        document.getElementById('chatID').classList.add('ok');
+        s.innerHTML = `<div class="status-msg ok"><i class="ti ti-check"></i> Chat ID found: <strong>${cid}</strong></div>`;
+        checkSetup();
+      } else {
+        s.innerHTML = '<div class="status-msg err"><i class="ti ti-x"></i> No chat found. Send a message to your bot first, then tap again.</div>';
+      }
+    } else {
+      s.innerHTML = '<div class="status-msg err"><i class="ti ti-x"></i> No messages yet. Open your bot in Telegram → tap Start → send "hi" → try again.</div>';
+    }
+  } catch(e) {
+    s.innerHTML = '<div class="status-msg err"><i class="ti ti-x"></i> Could not reach Telegram. Check your token and internet.</div>';
+  }
+}
+
+async function saveSetup() {
+  // BOT_TOKEN and CHAT_ID already baked in from init()
+  PIN = document.getElementById('sp1').value;
+  saveCfg();
+  buildUI();
+  buildAcctGrid();
+  await sendTG('🔐 <b>Vault PIN set</b>\nPum\'s Net Worth Vault is now active. Login alerts are enabled.');
+  show('lockPage');
+}
+
+function saveCfg() {
+  try { localStorage.setItem('nw_cfg', JSON.stringify({BOT_TOKEN, CHAT_ID, PIN})); } catch(e) {}
+}
+
+// ─── PIN LOGIC ───────────────────────────────────────────────
+function pp(d) {
+  if (pinEntry.length >= 6) return;
+  pinEntry += d; updateDots();
+  if (pinEntry.length === 6) setTimeout(checkPIN, 130);
+}
+function pc(all) {
+  pinEntry = all ? '' : pinEntry.slice(0,-1);
+  updateDots();
+  document.getElementById('pinErr').textContent = '';
+}
+function updateDots() {
+  for (let i=0; i<6; i++) document.getElementById('d'+i).classList.toggle('filled', i<pinEntry.length);
+}
+async function checkPIN() {
+  const now = new Date().toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'medium'});
+  if (pinEntry === PIN) {
+    addLog(true);
+    await sendTG(`✅ <b>Vault unlocked</b>\n👤 Pum's Net Worth Vault\n🕐 ${now}\n\nIf this wasn't you, change your PIN immediately.`);
+    show('vaultPage');
+    loadData(); recalc(); buildAcctGrid(); updateTgStatus();
+  } else {
+    addLog(false);
+    await sendTG(`⚠️ <b>Failed login attempt</b>\n👤 Pum's Net Worth Vault\n🕐 ${now}\n\nWrong PIN entered. If this wasn't you, your vault may be at risk.`);
+    document.getElementById('pinErr').textContent = 'Incorrect PIN — a Telegram alert has been sent.';
+    pinEntry = ''; updateDots();
+    const pd = document.getElementById('pinDots');
+    pd.style.animation = 'none'; void pd.offsetWidth; pd.style.animation = 'shake .4s ease';
+  }
+}
+async function logout() {
+  saveData();
+  const now = new Date().toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'medium'});
+  await sendTG(`🔒 <b>Vault locked</b>\n👤 Pum's Net Worth Vault\n🕐 ${now}`);
+  pinEntry = ''; updateDots();
+  document.getElementById('pinErr').textContent = '';
+  show('lockPage');
+}
+
+// ─── TELEGRAM ────────────────────────────────────────────────
+async function sendTG(text) {
+  if (!BOT_TOKEN || !CHAT_ID) return false;
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id: CHAT_ID, text, parse_mode:'HTML'})
+    });
+    return (await r.json()).ok;
+  } catch(e) { return false; }
+}
+async function testAlert() {
+  document.getElementById('testBtn').disabled = true;
+  document.getElementById('testStatus').innerHTML = '<div class="status-msg info"><i class="ti ti-loader"></i> Sending...</div>';
+  const ok = await sendTG('🧪 <b>Test alert</b>\nTelegram notifications are working for Pum\'s Net Worth Vault. ✅');
+  document.getElementById('testStatus').innerHTML = ok
+    ? '<div class="status-msg ok"><i class="ti ti-check"></i> Test message sent to your Telegram!</div>'
+    : '<div class="status-msg err"><i class="ti ti-x"></i> Failed. Check your bot token and chat ID in Settings.</div>';
+  document.getElementById('testBtn').disabled = false;
+}
+async function updateTgStatus() {
+  const el = document.getElementById('tgStatus');
+  if (!BOT_TOKEN || !CHAT_ID) { el.textContent='Not configured'; return; }
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
+    const d = await r.json();
+    if (d.ok) { el.textContent = '✓ @'+d.result.username; el.style.background='rgba(52,199,89,0.15)'; el.style.color='#34C759'; }
+    else { el.textContent='Token error'; el.style.background='var(--bg-danger)'; el.style.color='var(--text-danger)'; }
+  } catch(e) { el.textContent='Offline'; }
+}
+
+// ─── LOG ─────────────────────────────────────────────────────
+function addLog(success) {
+  const ts = new Date().toLocaleString('en-IN', {dateStyle:'short', timeStyle:'short'});
+  loginLog.unshift({ts, success});
+  if (loginLog.length > 20) loginLog.pop();
+}
+function renderLog() {
+  const el = document.getElementById('logList');
+  if (!loginLog.length) { el.innerHTML='<div class="log-empty">No logins yet this session.</div>'; return; }
+  el.innerHTML = loginLog.map(l =>
+    `<div class="log-row"><span>${l.ts}</span><span class="log-badge ${l.success?'ok':'fail'}">${l.success?'Unlocked':'Failed'}</span></div>`
+  ).join('');
+}
+
+// ─── TABS ────────────────────────────────────────────────────
+function showTab(t) {
+  ['portfolio','accounts','alerts','settings'].forEach(x => {
+    document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)).style.display = (t===x)?'block':'none';
+    document.getElementById('tab-'+x).classList.toggle('active', t===x);
+  });
+  if (t==='alerts') { renderLog(); updateTgStatus(); }
+  if (t==='settings') {
+    document.getElementById('stToken').value = BOT_TOKEN;
+    document.getElementById('stChat').value = CHAT_ID;
+  }
+}
+
+// ─── SETTINGS ────────────────────────────────────────────────
+function changePin() {
+  const p1=document.getElementById('cp1').value, p2=document.getElementById('cp2').value;
+  const err=document.getElementById('cpErr');
+  if(!/^\d{6}$/.test(p1)){err.textContent='PIN must be exactly 6 digits.';return;}
+  if(p1!==p2){err.textContent='PINs do not match.';return;}
+  PIN=p1; saveCfg(); err.textContent='';
+  document.getElementById('cp1').value=''; document.getElementById('cp2').value='';
+  sendTG('🔑 <b>PIN changed</b>\nYour vault PIN was updated successfully.');
+  alert('PIN updated! Your new PIN is active.');
+}
+async function saveTgSettings() {
+  const tok=document.getElementById('stToken').value.trim();
+  const cid=document.getElementById('stChat').value.trim();
+  const s=document.getElementById('tgSaveStatus');
+  if(!tok||!cid){s.innerHTML='<div class="status-msg err"><i class="ti ti-x"></i> Both token and chat ID are required.</div>';return;}
+  BOT_TOKEN=tok; CHAT_ID=cid; saveCfg();
+  const ok=await sendTG('🔄 <b>Telegram settings updated</b>\nNew bot connected to Pum\'s Net Worth Vault.');
+  s.innerHTML=ok?'<div class="status-msg ok"><i class="ti ti-check"></i> Updated and verified!</div>':'<div class="status-msg err"><i class="ti ti-x"></i> Saved but Telegram test failed. Check your token.</div>';
+  updateTgStatus();
+}
+function resetVault() {
+  if(!confirm('This will delete ALL your vault data, bot config and PIN. This cannot be undone. Continue?')) return;
+  try { localStorage.removeItem('nw_cfg'); localStorage.removeItem('nw_data'); } catch(e) {}
+  PIN=''; BOT_TOKEN=''; CHAT_ID=''; pinEntry=''; linked=new Set(); loginLog=[];
+  show('setupPage');
+}
+
+// ─── BUILD UI ────────────────────────────────────────────────
+function buildUI() {
+  const container = document.getElementById('assetSections');
+  container.innerHTML = '';
+  SECTIONS.forEach((sec, i) => {
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom = '.75rem';
+    wrap.innerHTML = `<div class="sec-hdr"><i class="ti ${sec.icon}" style="font-size:15px;color:${sec.color}"></i><span class="sec-title">${sec.label}</span><span class="sec-sum" id="${sec.sumId}">₹0</span></div>`;
+    const card = document.createElement('div');
+    card.className = 'asset-card';
+    sec.fields.forEach(f => {
+      const row = document.createElement('div');
+      row.className = 'arow off'; row.id = 'row_'+f.k;
+      row.innerHTML = `<div class="cb" id="cb_${f.k}" onclick="tog('${f.k}')"></div>
+        <div><span class="aname">${f.n}</span>${f.bl?`<span class="abadge ${f.b||''}">${f.bl}</span>`:''}</div>
+        <input type="number" class="ainput" id="v_${f.k}" placeholder="0" disabled onchange="recalc()" min="0">
+        <div class="ccy">${f.usd?'USD':'INR'}</div>`;
+      card.appendChild(row);
+    });
+    wrap.appendChild(card);
+    container.appendChild(wrap);
+  });
+  // Liabilities
+  const lw = document.createElement('div');
+  lw.style.marginBottom = '.75rem';
+  lw.innerHTML = `<div class="sec-hdr"><i class="ti ti-trending-down" style="font-size:15px;color:var(--text-danger)"></i><span class="sec-title">Liabilities</span><span class="sec-sum" id="ssL" style="color:var(--text-danger)">₹0</span></div>`;
+  const lc = document.createElement('div');
+  lc.className = 'asset-card';
+  LIAB.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'arow off'; row.id = 'row_'+f.k;
+    row.innerHTML = `<div class="cb" id="cb_${f.k}" onclick="tog('${f.k}')"></div>
+      <div><span class="aname">${f.n}</span></div>
+      <input type="number" class="ainput" id="v_${f.k}" placeholder="0" disabled onchange="recalc()" min="0">
+      <div class="ccy">INR</div>`;
+    lc.appendChild(row);
+  });
+  lw.appendChild(lc);
+  container.appendChild(lw);
+}
+
+function buildAcctGrid() {
+  const g = document.getElementById('acctGrid');
+  g.innerHTML = '';
+  ACCTS.forEach(a => {
+    const lk = linked.has(a.id);
+    const d = document.createElement('div');
+    d.className = 'acct-card' + (lk?' linked':'');
+    d.innerHTML = `<div class="acct-logo" style="background:${a.bg};color:${a.color}">${a.icon}</div>
+      <div class="acct-name">${a.name}</div>
+      <div class="acct-sub">${a.sub}</div>
+      <div class="acct-st${lk?' ok':''}">${lk?'✓ Connected':'Not connected'}</div>
+      <button class="acct-btn${lk?' lk':''}" onclick="togAcct('${a.id}')">${lk?'Disconnect':'Connect →'}</button>`;
+    g.appendChild(d);
+  });
+}
+
+function togAcct(id) {
+  if (linked.has(id)) { linked.delete(id); }
+  else {
+    linked.add(id);
+    const name = ACCTS.find(a=>a.id===id)?.name||id;
+    alert(`To connect ${name}: Visit their website or app, look for "API Access", "Developer Tools", or "Export Portfolio". For Indian brokers, the SEBI Account Aggregator (AA) framework via Finvu or OneMoney is the most secure route. For Vanguard/Robinhood, use their official API with OAuth2.`);
+  }
+  buildAcctGrid(); saveData();
+}
+
+// ─── TOGGLE CHECKBOX ─────────────────────────────────────────
+function tog(k) {
+  const cb=document.getElementById('cb_'+k), inp=document.getElementById('v_'+k), row=document.getElementById('row_'+k);
+  cb.classList.toggle('on');
+  const on = cb.classList.contains('on');
+  inp.disabled = !on;
+  row.classList.toggle('off', !on);
+  recalc(); saveData();
+}
+
+// ─── COMPUTE ─────────────────────────────────────────────────
+function getV(k) {
+  const cb=document.getElementById('cb_'+k);
+  if(!cb?.classList.contains('on')) return 0;
+  return Math.max(0, parseFloat(document.getElementById('v_'+k)?.value)||0);
+}
+function fI(n) {
+  if(n>=10000000) return '₹'+(n/10000000).toFixed(2)+' Cr';
+  if(n>=100000)   return '₹'+(n/100000).toFixed(2)+' L';
+  return '₹'+Math.round(n).toLocaleString('en-IN');
+}
+function fU(n) {
+  if(n>=1000000) return '$'+(n/1000000).toFixed(2)+'M';
+  return '$'+Math.round(n).toLocaleString();
+}
+
+function recalc() {
+  const rate = Math.abs(parseFloat(document.getElementById('rateIn')?.value)||0) || 85;
+  const sums = SECTIONS.map((sec, i) => {
+    let t = 0;
+    sec.fields.forEach(f => { let v=getV(f.k); if(f.usd) v*=rate; t+=v; });
+    const el=document.getElementById(sec.sumId); if(el) el.textContent=fI(t);
+    return t;
+  });
+  let liab = 0;
+  LIAB.forEach(f => { liab+=getV(f.k); });
+  const lel=document.getElementById('ssL'); if(lel) lel.textContent='-'+fI(liab);
+  const gross=sums.reduce((a,b)=>a+b,0), net=gross-liab;
+  const ti=document.getElementById('totINR'); if(ti) ti.textContent=fI(Math.max(0,net));
+  const tu=document.getElementById('totUSD'); if(tu) tu.textContent=fU(Math.max(0,net/rate));
+  const ts=document.getElementById('totINRs'); if(ts) ts.textContent=net>=0?'Assets − liabilities':'Review liabilities';
+  const ts2=document.getElementById('totUSDs'); if(ts2) ts2.textContent='At ₹'+rate.toFixed(1)+'/USD';
+  const bt=document.getElementById('barTot'); if(bt) bt.textContent=fI(gross)+' gross';
+  const g=gross||1;
+  sums.forEach((s,i)=>{ const el=document.getElementById('sg'+i); if(el) el.style.width=((s/g)*100).toFixed(1)+'%'; });
+}
+
+// ─── PERSIST ─────────────────────────────────────────────────
+function saveData() {
+  try {
+    const allF=[...SECTIONS.flatMap(s=>s.fields.map(f=>f.k)),...LIAB.map(f=>f.k)];
+    const fields={};
+    allF.forEach(k=>{
+      const cb=document.getElementById('cb_'+k), inp=document.getElementById('v_'+k);
+      if(cb) fields[k]={v:inp?.value||'',on:cb.classList.contains('on')};
+    });
+    localStorage.setItem('nw_data', JSON.stringify({
+      rate:document.getElementById('rateIn')?.value||'85',
+      linked:[...linked], fields
+    }));
+  } catch(e) {}
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem('nw_data');
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    const ri=document.getElementById('rateIn'); if(ri&&data.rate) ri.value=data.rate;
+    linked = new Set(data.linked||[]);
+    const allF=[...SECTIONS.flatMap(s=>s.fields.map(f=>f.k)),...LIAB.map(f=>f.k)];
+    allF.forEach(k=>{
+      const d=data.fields?.[k]; if(!d) return;
+      const cb=document.getElementById('cb_'+k), inp=document.getElementById('v_'+k), row=document.getElementById('row_'+k);
+      if(!cb||!inp) return;
+      inp.value=d.v;
+      if(d.on){cb.classList.add('on');inp.disabled=false;row?.classList.remove('off');}
+    });
+    recalc();
+  } catch(e) {}
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+async function init() {
+  // Baked-in credentials — skip setup screen
+  const BAKED_TOKEN = '8813966087:AAEDEryuVUyfdXfLA4EW_AJYtEFRNgU-L_g';
+  const BAKED_CHAT  = '8225545223';
+  try {
+    const raw = localStorage.getItem('nw_cfg');
+    if(raw) {
+      const cfg = JSON.parse(raw);
+      // Use stored cfg (allows PIN change, TG update via Settings)
+      BOT_TOKEN = cfg.BOT_TOKEN || BAKED_TOKEN;
+      CHAT_ID   = cfg.CHAT_ID   || BAKED_CHAT;
+      PIN       = cfg.PIN       || '';
+      if(PIN) { buildUI(); show('lockPage'); return; }
+    }
+    // First run — baked credentials, prompt only for PIN
+    BOT_TOKEN = BAKED_TOKEN;
+    CHAT_ID   = BAKED_CHAT;
+    // Save baked creds so Settings tab can update them later
+    saveCfg();
+  } catch(e) {
+    BOT_TOKEN = BAKED_TOKEN;
+    CHAT_ID   = BAKED_CHAT;
+  }
+  // Show first-run PIN setup (simplified — no bot setup needed)
+  show('setupPage');
+}
+init();
+</script>
+</body>
+</html>
